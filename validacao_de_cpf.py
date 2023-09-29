@@ -1,5 +1,5 @@
 import re
-from os import system, name as OS
+from os import system, name as sistema_operacional
 from time import sleep
 
 
@@ -54,15 +54,12 @@ def cpf_eh_valido(CPF):
 
 
 def cpf_regex(CPF):
-    correspondencia = bool(
-        re.match(r'^[0-9]{3}\.{0,1}[0-9]{3}\.{0,1}[0-9]{3}\-{0,1}[0-9]{2}$', CPF)
+    return bool(
+        re.match(r'(^[0-9]{11}$|^[0-9]{3}\.{1}[0-9]{3}\.{1}[0-9]{3}\-{1}[0-9]{2}$)', CPF)
     )
-    return correspondencia
 
 
 def main():
-    sistema_operacional = OS
-
     while True:
         match sistema_operacional:
             case 'nt':
