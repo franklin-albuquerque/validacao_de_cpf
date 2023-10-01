@@ -3,86 +3,82 @@ from os import system, name as sistema_operacional
 from time import sleep
 
 
-def obter_primeiro_digito(CPF):
-    soma = 0
-    multiplicador = 10
-
-    for contador in range(len(CPF)):
-        soma += int(CPF[contador]) * (multiplicador - contador)
-    primeiro_digito = 11 - (soma % 11)
-
-    if primeiro_digito == 10 or primeiro_digito == 11:
-        return 0
-    else:
-        return primeiro_digito
+class ValidacaoDeCPF:
+    def __init__(self, cpf):
+        self.cpf = re.sub(r'[.-]', '', cpf)
+        self.cpf_entrada = cpf
 
 
-def obter_segundo_digito(CPF):
-    soma = 0
-    multiplicador = 11
+    def obter_primeiro_digito(self, cpf):
+        total = 0
+        multiplicador = 10
 
-    for contador in range(len(CPF)):
-        soma += int(CPF[contador]) * (multiplicador - contador)
-    segundo_digito = 11 - (soma % 11)
+        for contador in range(len(cpf)):
+            total += int(cpf[contador]) * (multiplicador - contador)
+        primeiro_digito = 11 - (total % 11)
 
-    if segundo_digito == 10 or segundo_digito == 11:
-        return 0
-    else:
-        return segundo_digito
-
-
-def cpf_eh_valido(CPF):
-    CPF_str = re.sub(r'[-.]', '', CPF)
-    resultado = None
-
-    if len(CPF_str) == 11 and CPF_str != '00000000000':
-        CPF_str = CPF_str[0:9]
-
-        try:
-            primeiro_digito = obter_primeiro_digito(CPF_str)
-            CPF_str += ''.join(str(primeiro_digito))
-
-            segundo_digito = obter_segundo_digito(CPF_str)
-            CPF_str += ''.join(str(segundo_digito))
-
-            resultado = CPF_str == re.sub(r'[-.]', '', CPF)
-
-        except:
-            resultado = None
-
-    return resultado
+        if primeiro_digito not in (10, 11):
+            return primeiro_digito
+        else:
+            return 0
 
 
-def cpf_regex(CPF):
-    return bool(
-        re.match(r'(^[0-9]{11}$|^[0-9]{3}\.{1}[0-9]{3}\.{1}[0-9]{3}\-{1}[0-9]{2}$)', CPF)
-    )
+    def obter_segundo_digito(self, cpf):
+        total = 0
+        multiplicador = 11
+
+        for contador in range(len(cpf)):
+            total += int(cpf[contador]) * (multiplicador - contador)
+        segundo_digito = 11 - (total % 11)
+
+        if segundo_digito not in (10, 11):
+            return segundo_digito
+        else:
+            return 0
+
+
+    def cpf_eh_valido(self):
+        resultado = None
+
+        if len(self.cpf) == 11 and self.cpf != self.cpf[0]*11:
+            validacao = ValidacaoDeCPF(self.cpf)
+            self.cpf = self.cpf[0:9]
+
+            try:
+                self.cpf += ''.join(str(validacao.obter_primeiro_digito(self.cpf)))
+                self.cpf += ''.join(str(validacao.obter_segundo_digito(self.cpf)))
+                resultado = (self.cpf == re.sub(r'[.-]', '', self.cpf_entrada))
+            except Exception:
+                resultado = None
+
+        return resultado
+
+
+    def expressao_regular(self):
+        return bool(
+            re.match(r'(^[0-9]{11}$|^[0-9]{3}\.{1}[0-9]{3}\.{1}[0-9]{3}\-{1}[0-9]{2}$)', self.cpf_entrada)
+        )
 
 
 def main():
     while True:
-        match sistema_operacional:
-            case 'nt':
-                system('cls')
-            case 'posix':
-                system('clear')
+        [system('cls') if sistema_operacional == 'nt' else system('clear')]
 
-        print('Seu CPF deve seguir um dos formatos aceitos:\n12345678999 ou 123.456.789-99', end='\n\n')
-        CPF = input('Digite o seu CPF: ')
+        print('O seu CPF deve estar em um dos formatos aceitos:\n123.456.789-99 ou 12345678999', end='\n\n')
+        cpf = input('Digite o seu CPF: ')
 
-        if cpf_regex(CPF) and cpf_eh_valido(CPF):
-            print(f'\nCPF válido!')
+        validacao = ValidacaoDeCPF(cpf)
+
+        if not validacao.cpf_eh_valido():
+            print('\nO CPF fornecido é inválido!')
+        elif not validacao.expressao_regular():
+            print('\nO CPF fornecido não está em nenhum dos formatos aceitos.')
+        else:
+            print(f'\nO CPF fornecido é válido!')
             break
 
-        elif not cpf_eh_valido(CPF):
-            print('\nO CPF não é válido!')
-
-        elif not cpf_regex(CPF):
-            print('\nO CPF informado não segue o padrão solicidato!')
-
-        print('Revise os dados digitados e tente novamente.')
-
-        sleep(2.75)
+        print('Por favor, verifique os dados inseridos e tente novamente.')
+        sleep(3.25)
 
 
 if __name__ == '__main__':
